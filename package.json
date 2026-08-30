@@ -1,0 +1,29 @@
+{
+  "name": "redline-analytics",
+  "version": "1.0.0",
+  "description": "Real-time Analytics Dashboard with ETL Pipeline",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node tests/test.js"
+  },
+  "keywords": [
+    "analytics",
+    "etl",
+    "pipeline",
+    "real-time",
+    "dashboard"
+  ],
+  "author": "Ananya",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redline Analytics - Real-Time Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .header-desc {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .metric-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+    }
+
+    .metric-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .metric-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 8px;
+    }
+
+    .metric-change {
+      font-size: 12px;
+      color: #22c55e;
+      font-weight: 500;
+    }
+
+    .metric-change.negative {
+      color: #ef4444;
+    }
+
+    /* Charts Grid */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .chart-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .chart-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 300px;
+    }
+
+    /* Events Table */
+    .events-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+    }
+
+    .events-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .events-list {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .event-item {
+      padding: 12px;
+      border-left: 4px solid #667eea;
+      background: #f9f9f9;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      font-size: 13px;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .event-time {
+      color: #999;
+      font-weight: 500;
+    }
+
+    .event-action {
+      color: #667eea;
+      font-weight: 600;
+    }
+
+    .event-page {
+      color: #666;
+    }
+
+    .event-source {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-left: 8px;
+    }
+
+    .event-conversion {
+      background: #22c55e !important;
+    }
+
+    /* Scrollbar Styling */
+    .events-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .events-list::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    .events-list::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 4px;
+    }
+
+    .events-list::-webkit-scrollbar-thumb:hover {
+      background: #764ba2;
+    }
+
+    /* Source Table */
+    .sources-grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    .source-item {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto auto;
+      gap: 20px;
+      padding: 15px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .source-name {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .source-stat {
+      text-align: right;
+    }
+
+    .source-stat-label {
+      font-size: 11px;
+      color: #999;
+      display: block;
+    }
+
+    .source-stat-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: #667eea;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .metrics-grid,
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header-top {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .source-item {
+        grid-template-columns: 1fr auto;
+      }
+
+      .metric-value {
+        font-size: 24px;
+      }
+
+      header {
+        padding: 20px;
+      }
+    }
+
+    /* Loading animation */
+    .loading {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #667eea;
+      animation: blink 1.4s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="header-top">
+        <div>
+          <div class="logo">◆ Redline Analytics</div>
+          <div class="header-desc">Real-time data pipeline & visualization platform</div>
+        </div>
+        <div class="status">
+          <span class="status-dot"></span>
+          <span id="status-text">Live • <span id="event-count">0</span> events processed</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Metrics -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Total Sessions</div>
+        <div class="metric-value" id="metric-sessions">0</div>
+        <div class="metric-change">↑ Real-time</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Unique Visitors</div>
+        <div class="metric-value" id="metric-visitors">0</div>
+        <div class="metric-change">↑ Real-time</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Conversion Rate</div>
+        <div class="metric-value" id="metric-conversion">0%</div>
+        <div class="metric-change">↑ 2.4% vs yesterday</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Avg Session Duration</div>
+        <div class="metric-value" id="metric-duration">0m</div>
+        <div class="metric-change">↓ -15s vs yesterday</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Bounce Rate</div>
+        <div class="metric-value" id="metric-bounce">0%</div>
+        <div class="metric-change negative">↑ 5% vs yesterday</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Visitors Trend (48h)</div>
+        <div class="chart-container">
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Traffic Sources</div>
+        <div class="chart-container">
+          <canvas id="sourcesChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Source Performance -->
+    <div class="chart-card">
+      <div class="chart-title">Source Performance</div>
+      <div class="sources-grid" id="sources-container"></div>
+    </div>
+
+    <!-- Live Events -->
+    <div class="events-card">
+      <div class="events-title">Live Events Stream</div>
+      <div class="events-list" id="events-container">
+        <div class="event-item">Waiting for events...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let trendChart, sourcesChart;
+    let chartData = { labels: [], visitors: [], conversions: [] };
+    let sourceData = {};
+
+    // Initialize
+    async function init() {
+      await loadInitialData();
+      setupEventStream();
+      setupCharts();
+    }
+
+    async function loadInitialData() {
+      try {
+        const [metrics, hourly, sources] = await Promise.all([
+          fetch('/api/metrics').then(r => r.json()),
+          fetch('/api/hourly-data').then(r => r.json()),
+          fetch('/api/source-data').then(r => r.json())
+        ]);
+
+        updateMetrics(metrics);
+        
+        chartData.labels = hourly.map(h => new Date(h.timestamp).toLocaleTimeString());
+        chartData.visitors = hourly.map(h => h.visitors);
+        chartData.conversions = hourly.map(h => h.conversions);
+
+        sources.forEach(s => {
+          sourceData[s.name] = s;
+        });
+
+        renderSources();
+      } catch (error) {
+        console.error('Failed to load initial data:', error);
+      }
+    }
+
+    function setupEventStream() {
+      const eventSource = new EventSource('/api/stream');
+
+      eventSource.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          
+          if (message.type === 'event') {
+            addEventToUI(message.data);
+          } else if (message.type === 'metrics') {
+            updateMetrics(message.data);
+          }
+        } catch (error) {
+          console.error('Error processing event:', error);
+        }
+      };
+
+      eventSource.onerror = () => {
+        console.error('Event stream error');
+        eventSource.close();
+      };
+    }
+
+    function updateMetrics(metrics) {
+      document.getElementById('metric-sessions').textContent = metrics.totalSessions.toLocaleString();
+      document.getElementById('metric-visitors').textContent = metrics.uniqueVisitors.toLocaleString();
+      document.getElementById('metric-conversion').textContent = metrics.conversionRate + '%';
+      document.getElementById('metric-duration').textContent = (metrics.avgSessionDuration / 60).toFixed(1) + 'm';
+      document.getElementById('metric-bounce').textContent = metrics.bounceRate + '%';
+    }
+
+    function addEventToUI(event) {
+      const container = document.getElementById('events-container');
+      if (container.children[0].textContent.includes('Waiting')) {
+        container.innerHTML = '';
+      }
+
+      const eventEl = document.createElement('div');
+      eventEl.className = 'event-item';
+      
+      const time = new Date(event.timestamp).toLocaleTimeString();
+      const conversionClass = event.converted ? 'event-conversion' : '';
+      
+      eventEl.innerHTML = `
+        <div>
+          <span class="event-time">${time}</span>
+          <span class="event-action">${event.action}</span>
+          <span class="event-page">${event.page}</span>
+          <span class="event-source ${conversionClass}">${event.device}</span>
+          <span class="event-source">${event.source}</span>
+        </div>
+      `;
+
+      container.insertBefore(eventEl, container.firstChild);
+      if (container.children.length > 50) {
+        container.removeChild(container.lastChild);
+      }
+
+      // Update event count
+      document.getElementById('event-count').textContent = parseInt(document.getElementById('event-count').textContent) + 1;
+    }
+
+    function setupCharts() {
+      const trendCtx = document.getElementById('trendChart').getContext('2d');
+      trendChart = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+          labels: chartData.labels,
+          datasets: [
+            {
+              label: 'Visitors',
+              data: chartData.visitors,
+              borderColor: '#667eea',
+              backgroundColor: 'rgba(102, 126, 234, 0.1)',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.4,
+              pointRadius: 3,
+              pointBackgroundColor: '#667eea',
+              pointBorderColor: '#fff',
+              pointBorderWidth: 2
+            },
+            {
+              label: 'Conversions',
+              data: chartData.conversions,
+              borderColor: '#22c55e',
+              backgroundColor: 'rgba(34, 197, 94, 0.05)',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.4,
+              pointRadius: 3,
+              pointBackgroundColor: '#22c55e',
+              pointBorderColor: '#fff',
+              pointBorderWidth: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { usePointStyle: true, padding: 20 }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { drawBorder: false, color: 'rgba(0,0,0,0.05)' }
+            },
+            x: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+
+      const sourcesCtx = document.getElementById('sourcesChart').getContext('2d');
+      sourcesChart = new Chart(sourcesCtx, {
+        type: 'doughnut',
+        data: {
+          labels: [],
+          datasets: [{
+            data: [],
+            backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom' }
+          }
+        }
+      });
+
+      updateCharts();
+    }
+
+    function updateCharts() {
+      if (trendChart) {
+        trendChart.data.labels = chartData.labels;
+        trendChart.data.datasets[0].data = chartData.visitors;
+        trendChart.data.datasets[1].data = chartData.conversions;
+        trendChart.update('none');
+      }
+
+      const sources = Object.values(sourceData);
+      if (sourcesChart && sources.length > 0) {
+        sourcesChart.data.labels = sources.map(s => s.name);
+        sourcesChart.data.datasets[0].data = sources.map(s => s.users);
+        sourcesChart.update('none');
+      }
+    }
+
+    function renderSources() {
+      const container = document.getElementById('sources-container');
+      container.innerHTML = Object.values(sourceData).map(source => `
+        <div class="source-item">
+          <div class="source-name">${source.name}</div>
+          <div class="source-stat">
+            <span class="source-stat-label">Users</span>
+            <span class="source-stat-value">${source.users.toLocaleString()}</span>
+          </div>
+          <div class="source-stat">
+            <span class="source-stat-label">Sessions</span>
+            <span class="source-stat-value">${source.sessions.toLocaleString()}</span>
+          </div>
+          <div class="source-stat">
+            <span class="source-stat-label">Conv. Rate</span>
+            <span class="source-stat-value">${(source.conversionRate * 100).toFixed(1)}%</span>
+          </div>
+          <div class="source-stat">
+            <span class="source-stat-label">Bounce</span>
+            <span class="source-stat-value">${(source.bounceRate * 100).toFixed(1)}%</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Start the dashboard
+    init();
+  </script>
+</body>
+</html>
