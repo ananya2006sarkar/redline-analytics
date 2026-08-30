@@ -293,16 +293,6 @@ Contributions welcome! Areas for enhancement:
 - [ ] User authentication
 - [ ] Webhooks integration
 
-## 📄 License
-
-MIT License - See LICENSE file
-
-## 👨‍💻 Author
-
-Built as a demonstration of modern full-stack web development for enterprise analytics.
-
----
-
 ## ⚡ Next Steps
 
 1. **Run locally** - `npm start`
@@ -310,11 +300,4 @@ Built as a demonstration of modern full-stack web development for enterprise ana
 3. **Check the API** - Visit `http://localhost:5000/api/metrics`
 4. **Study the code** - Review `server.js` and `public/index.html`
 5. **Deploy** - Push to GitHub and deploy to Heroku, Railway, or Vercel
-
-## 📞 Support
-
-For questions about the architecture or implementation, review the code comments or check the GitHub issues page.
-
 ---
-
-**Built with ❤️ for the Accenture Internship Program**
