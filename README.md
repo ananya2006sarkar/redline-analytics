@@ -62,7 +62,7 @@ npm install
 npm start
 ```
 
-Server will start at `http://localhost:5000`
+Server will start at `http://localhost:5001`
 
 ### Development Mode
 
