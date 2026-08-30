@@ -155,13 +155,11 @@ redline-analytics/
 ├── server.js                 # Main Express server & ETL logic
 ├── package.json             # Dependencies
 ├── public/
-│   └── index.html          # Dashboard UI (HTML + CSS + JS)
-├── utils/                   # Utility functions (future)
+│   └── index.html          # Dashboard UI (HTML + CSS + JS 
 ├── tests/
 │   └── test.js             # Unit & integration tests
 ├── README.md               # This file
 ├── .gitignore              # Git ignore rules
-└── LICENSE                 # MIT License
 ```
 
 ## 🔄 ETL Pipeline Details
