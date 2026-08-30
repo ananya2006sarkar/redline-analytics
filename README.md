@@ -296,7 +296,7 @@ Contributions welcome! Areas for enhancement:
 ## ⚡ Next Steps
 
 1. **Run locally** - `npm start`
-2. **Explore the dashboard** - Visit `http://localhost:5000`
+2. **Explore the dashboard** - Visit `http://localhost:5001`
 3. **Check the API** - Visit `http://localhost:5000/api/metrics`
 4. **Study the code** - Review `server.js` and `public/index.html`
 5. **Deploy** - Push to GitHub and deploy to Heroku, Railway, or Vercel
